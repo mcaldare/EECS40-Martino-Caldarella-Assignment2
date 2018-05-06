@@ -1,3 +1,15 @@
 <resources>
-    <string name="app_name">Assignment2</string>
+    <string name="app_name">Calculator</string>
+    <string name="button_pi"> &#960;</string>
+    <string name="button_division">&#247;</string>
+    <string name="button_percentage">&#37;</string>
+    <string name="button_del">&#8592;</string>
+    <string name="button_equal">&#61;</string>
+    <string name="button_mult">&#215;</string>
+    <string name="button_sqrt">&#8730;</string>
+    <string name="input">input</string>
+    <string name="output">output</string>
+    <string name="answer">Ans</string>
+    <string name="square">x&#178;</string>
+
 </resources>
