@@ -1,11 +1,13 @@
 package com.pandopia.assignment2;
 
 
+import android.icu.lang.UCharacter;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import java.text.DecimalFormat;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -21,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
 
     boolean firstNumber = false;
     boolean firstUse = true;
+    boolean secondOperation = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,8 +111,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
         buttonDot.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -121,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
         buttonPI.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                textIn.setText(textIn.getText().toString() + Double.toString(3.14159));
+                textIn.setText(textIn.getText().toString() + "\u03C0");
                 firstNumber = true;
             }
         });
@@ -129,12 +130,20 @@ public class MainActivity extends AppCompatActivity {
         buttonMult.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(firstNumber == true) {
-                    textIn.setText(textIn.getText().toString() + " x ");
-
+                if(!secondOperation) {
+                    if (firstNumber == true) {
+                        textIn.setText(textIn.getText().toString() + " x ");
+                    } else {
+                        textIn.setText("Ans x ");
+                    }
+                    secondOperation = true;
                 }
                 else{
-                    textIn.setText("Ans x ");
+                    calculator(textIn.getText().toString());
+                    output = formatOutput(output);
+                    textIn.setText(output + " x ");
+                    firstNumber = false;
+                    firstUse = false;
                 }
             }
         });
@@ -142,11 +151,20 @@ public class MainActivity extends AppCompatActivity {
         buttonDiv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(firstNumber == true) {
-                    textIn.setText(textIn.getText().toString() + " / ");
+                if(!secondOperation) {
+                    if (firstNumber == true) {
+                        textIn.setText(textIn.getText().toString() + " / ");
+                    } else {
+                        textIn.setText("Ans / ");
+                    }
+                    secondOperation = true;
                 }
                 else{
-                    textIn.setText("Ans / ");
+                    calculator(textIn.getText().toString());
+                    output = formatOutput(output);
+                    textIn.setText(output + " / ");
+                    firstNumber = false;
+                    firstUse = false;
                 }
             }
         });
@@ -160,7 +178,9 @@ public class MainActivity extends AppCompatActivity {
                 else{
                     textIn.setText("Ans - ");
                 }
+
             }
+
         });
 
         buttonAdd.setOnClickListener(new View.OnClickListener() {
@@ -172,6 +192,7 @@ public class MainActivity extends AppCompatActivity {
                 else{
                     textIn.setText("Ans + ");
                 }
+
             }
         });
 
@@ -179,27 +200,39 @@ public class MainActivity extends AppCompatActivity {
         buttonPerc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                    String temp = textIn.getText().toString();
-                    textIn.setText(percentage(temp));
-                   }
+                    try {
+                        String temp = textIn.getText().toString();
+                        textIn.setText(percentage(temp));
+                    }
+                    catch (Exception e){
+                        textOut.setText("Error");
+                    }
+                }
         });
 
         buttonSquare.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                String temp = textIn.getText().toString();
-                textIn.setText(square(temp));
+                try {
+                    String temp = textIn.getText().toString();
+                    textIn.setText(square(temp));
+                }
+                catch (Exception e){
+                    textOut.setText("Error");
+                }
             }
         });
 
         buttonSqrt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                String temp = textIn.getText().toString();
-                textIn.setText(sqrt(temp));
+                try {
+                    String temp = textIn.getText().toString();
+                    textIn.setText(sqrt(temp));
+                }
+                catch (Exception e){
+                    textOut.setText("Error");
+                }
             }
         });
 
@@ -230,16 +263,22 @@ public class MainActivity extends AppCompatActivity {
         buttonEqls.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                calculator(textIn.getText().toString());
-                answer = Double.parseDouble(output);
-                textIn.setText("");
-                textOut.setText(output);
-                firstNumber = false;
-                firstUse = false;
+                try {
+                    calculator(textIn.getText().toString());
+                    answer = Double.parseDouble(output);
+                    textIn.setText("");
+                    output = formatOutput(output);
+                    textOut.setText(output);
+                    firstNumber = false;
+                    firstUse = false;
+                    secondOperation = false;
+                }
+                catch (Exception e){
+                    textOut.setText("Error");
+                    textIn.setText("");
+                }
             }
         });
-
-
 
     }
 
@@ -273,65 +312,116 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
+    private String formatOutput (String s){
+
+        Double d = Double.parseDouble(s);
+        DecimalFormat format = new DecimalFormat("#.###########");
+        return format.format(d);
+
+    }
+
     private String percentage (String s){
-        String[]tokens = s.split(" ");
-        StringBuffer temp = new StringBuffer();
         double numToConvert;
-        if(tokens[(tokens.length)-1].contains("Ans")){
+
+        if(s.equals("")){
             numToConvert = answer;
+            numToConvert = Math.sqrt(numToConvert);
+            return Double.toString(numToConvert);
         }
-        else{
-            numToConvert = Double.parseDouble(tokens[(tokens.length)-1]);
+        else {
+
+            String[] tokens = s.split(" ");
+            StringBuffer temp = new StringBuffer();
+
+            if (tokens[(tokens.length) - 1].contains("Ans")) {
+                numToConvert = answer;
+            } else {
+                numToConvert = Double.parseDouble(tokens[(tokens.length) - 1]);
+            }
+            numToConvert = numToConvert / 100;
+            tokens[(tokens.length) - 1] = Double.toString(numToConvert);
+            for (int i = 0; i < tokens.length; i++) {
+                temp.append(tokens[i]);
+                temp.append(" ");
+            }
+            return temp.toString();
         }
-        numToConvert = numToConvert/100;
-        tokens[(tokens.length)-1] = Double.toString(numToConvert);
-        for (int i = 0; i < tokens.length ; i++) {
-            temp.append(tokens[i]);
-            temp.append(" ");
-        }
-        return temp.toString();
     }
 
     private String square (String s){
-        String[]tokens = s.split(" ");
-        StringBuffer temp = new StringBuffer();
+
         double numToSquare;
-        if(tokens[(tokens.length)-1].contains("Ans")){
+
+        if(s.equals("")) {
             numToSquare = answer;
+            numToSquare = numToSquare * numToSquare;
+            return Double.toString(numToSquare);
         }
-        else{
-            numToSquare = Double.parseDouble(tokens[(tokens.length)-1]);
+        else if (s.equals("\u03C0")){
+                numToSquare = 3.14159265359;
+                numToSquare = numToSquare * numToSquare;
+                return Double.toString(numToSquare);
         }
-        numToSquare = numToSquare * numToSquare;
-        tokens[(tokens.length)-1] = Double.toString(numToSquare);
-        for (int i = 0; i < tokens.length ; i++) {
-            temp.append(tokens[i]);
-            temp.append(" ");
+        else {
+            String[] tokens = s.split(" ");
+            StringBuffer temp = new StringBuffer();
+
+            if (tokens[(tokens.length) - 1].contains("Ans")) {
+                numToSquare = answer;
+            }
+            else if (tokens[(tokens.length) - 1].contains("\u03C0")) {
+                numToSquare = 3.14159265359;
+            }
+            else {
+                numToSquare = Double.parseDouble(tokens[(tokens.length) - 1]);
+            }
+            numToSquare = numToSquare * numToSquare;
+            tokens[(tokens.length) - 1] = Double.toString(numToSquare);
+            for (int i = 0; i < tokens.length; i++) {
+                temp.append(tokens[i]);
+                temp.append(" ");
+            }
+            return temp.toString();
         }
-        return temp.toString();
     }
 
     private String sqrt (String s){
-        String[]tokens = s.split(" ");
-        StringBuffer temp = new StringBuffer();
         double numToSqrt;
-        if(tokens[(tokens.length)-1].contains("Ans")){
+
+        if(s.equals("")){
             numToSqrt = answer;
+            numToSqrt = Math.sqrt(numToSqrt);
+            return Double.toString(numToSqrt);
         }
-        else{
-            numToSqrt = Double.parseDouble(tokens[(tokens.length)-1]);
+        else if (s.equals("\u03C0")){
+            numToSqrt = 3.14159265359;
+            numToSqrt = Math.sqrt(numToSqrt);
+            return Double.toString(numToSqrt);
         }
-        numToSqrt = Math.sqrt(numToSqrt);
+            else {
+            String[] tokens = s.split(" ");
+            StringBuffer temp = new StringBuffer();
 
-        tokens[(tokens.length)-1] = Double.toString(numToSqrt);
-        for (int i = 0; i < tokens.length ; i++) {
-            temp.append(tokens[i]);
-            temp.append(" ");
+            if (tokens[(tokens.length) - 1].contains("Ans")) {
+                numToSqrt = answer;
+            }
+            else if (tokens[(tokens.length) - 1].contains("\u03C0")) {
+                numToSqrt = 3.14159265359;
+            }
+            else {
+                numToSqrt = Double.parseDouble(tokens[(tokens.length) - 1]);
+            }
+            numToSqrt = Math.sqrt(numToSqrt);
+
+            tokens[(tokens.length) - 1] = Double.toString(numToSqrt);
+            for (int i = 0; i < tokens.length; i++) {
+                temp.append(tokens[i]);
+                temp.append(" ");
+            }
+            return temp.toString();
         }
-        return temp.toString();
     }
-
-
 
     private String delete (String s){
         String[]tokens = s.split("");
@@ -350,47 +440,53 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void calculator(String s){
+    private void calculator(String s) {
 
         double result = 0;
+        double[] nums = new double[20];
 
-        if(isNumeric(s)){
+
+        String[] tokens = s.split("\\s+");
+
+        if (isNumeric(s)) {
             result = Double.parseDouble(s);
-        }
-        else if(s == "Ans"){
+        } else if (s.equals("Ans")) {
             result = answer;
-        }
-        else {
-
-            String[] tokens = s.split("\\s+");
-            double[] nums = new double[2];
-
-
+        } else if (s.equals("\u03C0")) {
+            result = 3.14159265359;
+        } else{
             for (int i = 0; i < tokens.length; i++) {
                 if (tokens[i].contains("Ans")) {
                     tokens[i] = Double.toString(answer);
+                } else if (tokens[i].contains("\u03C0")) {
+                    tokens[i] = Double.toString(3.14159265359);
                 }
             }
 
-            nums[0] = Double.parseDouble(tokens[0]);
-            nums[1] = Double.parseDouble(tokens[2]);
-
-
-            if (s.contains("+")) {
-                result = nums[0] + nums[1];
-            } else if (s.contains("-")) {
-                result = nums[0] - nums[1];
-            } else if (s.contains("x")) {
-                result = nums[0] * nums[1];
-            } else if (s.contains("/")) {
-                result = nums[0] / nums[1];
-            } else {
-                result = Double.parseDouble(s);
+        for (int i = 0; i < tokens.length; i++) {
+            if (i % 2 == 0) {
+                nums[i] = Double.parseDouble(tokens[i]);
             }
         }
 
+
+        if (s.contains("+")) {
+            result = nums[0] + nums[2];
+        } else if (s.contains("-")) {
+            result = nums[0] - nums[2];
+        } else if (s.contains("x")) {
+            result = nums[0] * nums[2];
+        } else if (s.contains("/")) {
+            result = nums[0] / nums[2];
+        } else {
+            result = Double.parseDouble(s);
+        }
+    }
+
         output = Double.toString(result);
     }
+
+
 
     static boolean isNumeric(String str) {
         try {
